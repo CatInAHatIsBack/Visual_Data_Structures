@@ -1,0 +1,378 @@
+package src;
+
+
+import javax.swing.Timer;
+import java.awt.*;
+import java.awt.event.*;
+import java.util.Queue;
+
+import java.awt.Color;
+import java.util.LinkedList;
+import java.util.Random;
+import java.util.Stack;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+
+import javax.swing.JPanel;
+
+public class myPanel extends JPanel implements KeyListener, ActionListener{
+    
+    int width;
+    int height;
+    Node selected;
+    Node root;
+    Timer timer;
+    myPanel(int width, int height){
+
+        this.width = width;
+        this.height = height;
+        this.setFocusable(true);
+        this.addKeyListener(this);
+        this.setBackground(Color.black);
+        this.setFocusable(true);
+        Node root = nodeController(this.width, 100);
+        this.root = root;
+    }
+    
+    @Override
+    public void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        doDrawing(g);
+        // paintGrid(g, 15);
+        
+        paintController(g, this.root); 
+    }
+    public void paintController(Graphics g, Node root){
+        Queue<Node> q = new LinkedList<>();
+        q.add(root);
+        Node curr = root;
+        while(!q.isEmpty()){
+            curr = q.poll(); 
+
+            if(curr!=null){
+                // if(curr.hasParent){
+
+                //     drawNewLine(g, curr, curr.parent);
+                //     System.out.println(curr.number);
+                // } 
+                paintNode(g, curr.xPos, curr.yPos, curr.size,String.valueOf(curr.number), curr.isSelected, curr.isPath);
+                q.add(curr.left);
+                q.add(curr.right);
+            }
+        } 
+    }
+    private void paintNode(Graphics g, int X, int Y, int size, String count, boolean isSelected, boolean isPath){
+        Graphics2D g2 = (Graphics2D) g;
+        int square = size;
+        int dia = square/2;
+        int font = dia;
+
+        // size & color
+        g2.setStroke(new BasicStroke(1.0f));
+
+
+
+        if(isPath){
+            g2.setColor(Color.GRAY);
+            g2.fillOval(X, Y, size, size);
+        }
+        // circle
+        if(isSelected){
+            g2.setColor(Color.red);
+            g2.fillOval(X, Y, size, size);
+        }
+        else{
+            g2.setColor(Color.gray);
+            g2.drawOval(X,Y , size, size);
+        }
+
+        
+        // text mod 
+        Font mononoki = new Font("mononoki Nerd Font", Font.PLAIN, font);        
+        g2.setFont(mononoki);
+        g2.setColor(Color.DARK_GRAY);
+        
+        //          str         x                      y 
+        // g2.drawString("1", (3/2 * dia)-(font/4), (3/2 * dia)+(font/2));
+        if(Integer.parseInt(count) < 10)
+            g2.drawString(count, X +(dia/2) + (dia/4), Y +dia+(dia/4));
+
+        else
+            g2.drawString(count, X +(dia/2)  , Y +dia+(dia/4));
+
+        
+        // corner dot to show x,y
+        g2.fillOval(X, Y, 10, 10);
+    }
+
+    class Node{
+        Node parent = null;
+        Node left;
+        Node right;
+
+        int xPos;
+        int yPos;
+        int size;
+        int number;
+        int window;
+        boolean hasParent = false;
+        boolean isSelected = false; 
+        int rotation;
+        boolean isPath = false;
+        int offset;
+        Node(int x, int y, int size, int number, int window, int rotation, int offset){
+
+            this.xPos = x;
+            this.yPos = y;
+            this.size = size;
+            this.number = number;
+            this.window = window;
+            this.rotation = rotation;
+            this.offset = offset;
+        }
+    }
+    private Node nodeController(int window, int size){
+        int startx = window/2;
+        int starty = window/2;
+        int offset = -width/2;
+        Node root = new Node(startx, 50, 100,0, window/2, 75, offset);
+        root.isSelected = true;
+        selected = root;
+        Queue<Node> q = new LinkedList<>();
+        q.add(root);
+        int rotation = 75;
+        double curve = .5;
+        while(!q.isEmpty()){
+            Node curr = q.poll();
+            if(curr.number * 2 +1 <= 40){
+                makeNode(curr, true, true, rotation, (int)(curr.offset *curve),0, true);
+                q.add(curr.left);
+            }
+            if(curr.number * 2 +2 <= 40){
+                makeNode(curr, true,true, rotation, (int)(curr.offset *curve), 0, false);
+                q.add(curr.right);
+            }
+        }
+        return root;
+    }
+    private void makeNode(Node node, boolean s, boolean r, int rotation, int off, int space, boolean left){
+        // s = false not shrinking
+        // s = true shrinking 
+        // boolean r = relative placement
+        
+        int newx;
+        int newy;
+        int size;
+        int newWindow;
+        if(s){
+            size = (int) (node.size*0.8);
+        }
+        else{
+            size = node.size;
+        }
+        if(r){
+            // relative
+            int theta;
+            if(left){
+                theta = node.rotation * -1;
+            }
+            else{
+                theta = node.rotation ;
+            }
+            int ox = node.xPos + node.size/2;
+            int oy = node.yPos + node.size;
+            int x = 0;
+            int y = off;
+            int xoff = (int) ( x*Math.cos(Math.toRadians(theta)) - y*Math.sin(Math.toRadians(theta)));
+            int yoff = (int) ( x*Math.sin(Math.toRadians(theta)) + y*Math.cos(Math.toRadians(theta)));
+            if(left){
+                newx = ox - size + xoff;
+                newy = oy - yoff;
+            }
+            else{
+                newx = ox + xoff;
+                newy = oy - yoff;
+            }
+            newWindow = node.window;
+        }
+        else{
+            newWindow = node.window/2;
+            newx = node.xPos - newWindow;
+            newy = node.yPos + 2*node.size + space;
+        }
+        if(left){
+            node.left = new Node(newx, newy,size,node.number*2+1, newWindow,node.rotation -15, off);
+            node.left.parent = node;
+            node.left.hasParent = true;
+        }
+        else{
+                
+           node.right= new Node(newx, newy,size,node.number*2+2, newWindow, node.rotation -15, off);
+            node.right.parent = node;
+            node.right.hasParent = true;
+        }
+    }
+ 
+
+    private void paintGrid(Graphics g, int scale){
+        int newHeight = this.height/scale;
+        int newWidth = this.width/scale;
+
+        Graphics2D g2 = (Graphics2D) g;
+        g2.setStroke(new BasicStroke(1.0f));
+        g2.setColor(Color.white);
+        for (int i = 0; i < scale; i++) {
+            g2.drawLine( 0,newHeight *i, this.width, newHeight *i);
+        }
+        for (int i = 0; i < scale; i++) {
+            g2.drawLine( newWidth *i,0, newWidth *i, this.height);
+        }
+        
+    }
+    private void doDrawing(Graphics g) {
+
+        Graphics2D g2d = (Graphics2D) g;
+
+        g2d.setColor(Color.blue);
+
+        for (int i = 0; i <= 1000; i++) {
+
+            var size = getSize();
+            var insets = getInsets();
+
+            int w = size.width - insets.left - insets.right;
+            int h = size.height - insets.top - insets.bottom;
+
+            var r = new Random();
+            int x = Math.abs(r.nextInt()) % w;
+            int y = Math.abs(r.nextInt()) % h;
+            g2d.drawLine(x, y, x, y);
+        }
+    }
+    private void handler(){
+        selected.isSelected = false;
+        selected.left.isSelected = true;
+        this.selected = selected.left;
+        repaint();
+    }
+    
+    Stack<Node> stack;
+    private void dfs(){
+        
+        if(moveUP == true){
+            moveUp();
+            moveUP = false;
+        }
+        else{
+            Node curr = stack.pop();  
+            changeSelected(curr);
+            if(curr.right != null){
+                stack.push(curr.right);
+            }
+            if(curr.left != null){
+                stack.push(curr.left);
+            }
+            if(curr.left == null && curr.right == null){
+                if(curr.parent == null){
+                    timer.stop();
+                    return;
+                }
+                moveUP = true;
+            }
+        }
+
+
+        repaint();
+    }
+    boolean moveUP = false;
+    private void changeSelected(Node curr){
+        selected.isPath = true;
+        selected.isSelected = false;
+        selected = curr;
+        curr.isSelected = true;
+    }
+
+    private void moveUp(){
+        this.selected.isSelected = false; 
+        changeSelected(selected.parent); 
+        selected.isPath = false;
+    }
+    private void handle(){
+        if(!stack.isEmpty()){
+            dfs();
+        }
+        else{
+            timer.stop();
+        }
+    }
+    @Override
+    public void keyPressed(KeyEvent e) {
+
+        if(this.timer != null) timer.stop();
+        selected.isSelected = false;
+        System.out.println(e.getKeyCode());
+        int key = e.getKeyCode();
+
+        switch (key){
+            case KeyEvent.VK_LEFT:
+                selected.left.isSelected = true;
+                selected = selected.left;
+                repaint();
+                break;
+            case KeyEvent.VK_RIGHT:
+                selected.right.isSelected = true;
+                selected = selected.right;
+                repaint();
+                break;
+             case KeyEvent.VK_UP:
+                selected.parent.isSelected = true;
+                selected = selected.parent;
+                repaint();
+                break;
+            case KeyEvent.VK_DOWN:
+                Animate(); 
+                break;
+            case KeyEvent.VK_D:
+                tempdfs = true; 
+                stack = new Stack<>();
+                stack.add(this.selected);
+                Animate(); 
+                break;
+        }
+        
+    }
+    boolean tempdfs = false;
+    private void Animate(){
+        //Set up timer to drive animation events.
+        timer = new Timer(1000, this);
+        timer.setInitialDelay(1000);
+        timer.start(); 
+        
+    }
+    
+    @Override
+    public void actionPerformed(ActionEvent arg0) {
+        // TODO Auto-generated method stub
+        if(tempdfs){
+            dfs();
+        }
+        else{
+            if(selected.left != null)
+                handler();
+            if(selected.left == null)
+                timer.stop();
+        }
+          
+    } 
+    @Override
+    public void keyReleased(KeyEvent arg0) {
+        // TODO Auto-generated method stub
+        
+    }
+    @Override
+    public void keyTyped(KeyEvent arg0) {
+        // TODO Auto-generated method stub
+        
+    }
+}
+

@@ -1,0 +1,418 @@
+package src;
+
+
+import javax.swing.Timer;
+import java.awt.*;
+import java.awt.event.*;
+import java.util.Queue;
+
+import java.awt.Color;
+import java.util.LinkedList;
+import java.util.Random;
+
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+
+import javax.swing.JPanel;
+
+public class myPanel extends JPanel implements KeyListener, ActionListener{
+    
+    int width;
+    int height;
+    Node root;
+    Node selected;
+    Node head;
+    Timer timer;
+    myPanel(int width, int height){
+
+        this.width = width;
+        this.height = height;
+        this.setFocusable(true);
+        this.addKeyListener(this);
+        this.setBackground(Color.black);
+        root = createNormalNode(width);
+        head = root;
+        root.isSelected = true;
+        selected = head;
+
+        
+    }
+    @Override
+    public void paintComponent(Graphics g) {
+
+        super.paintComponent(g);
+        doDrawing(g);
+        int size = this.width /5;
+        int scale = 5;
+        
+        paintGrid(g, scale);
+        control(g, this.width, root);
+    }
+     
+    
+    private void control(Graphics g, int width, Node root){
+
+        Queue<Node> q = new LinkedList<>();
+        q.add(root);
+        Node curr = root;
+        while(!q.isEmpty()){
+            curr = q.poll(); 
+
+            if(curr!=null){
+                // if(curr.hasParent){
+
+                //     drawNewLine(g, curr, curr.parent);
+                //     System.out.println(curr.number);
+                // } 
+                // noShrink(g, curr);        
+                // q.add(curr.left);
+                // q.add(curr.right);
+                noShrink(g, curr);
+                q.add(curr.left);
+                q.add(curr.right);
+            }
+        }
+    }
+    private void drawRotateNode(Graphics g, Node cuur){
+        
+    }
+    private void drawNewLine(Graphics g,Node curr, Node parent) {
+        g.setColor(Color.gray);
+        g.drawLine(curr.x , curr.y, parent.x , parent.y + parent.nodeSize);
+    }
+    private void nodeShrink(Graphics g,Node curr){
+        paintNode(g, curr.x - curr.nodeSize/2, curr.y, curr.nodeSize,String.valueOf(curr.number), curr.isSelected, curr.rotate);
+    }
+    private void noShrink(Graphics g,Node curr){
+        
+        paintNode(g, curr.x - curr.nodeSize/2, curr.y, curr.nodeSize,String.valueOf(curr.number), curr.isSelected, curr.rotate);
+    }
+
+    @Override
+    public void keyPressed(KeyEvent e) {
+
+        selected.isSelected = false;
+        System.out.println(e.getKeyCode());
+        int key = e.getKeyCode();
+
+        switch (key){
+            case KeyEvent.VK_LEFT:
+                selected.left.isSelected = true;
+                selected = selected.left;
+                repaint();
+                break;
+            case KeyEvent.VK_RIGHT:
+                selected.right.isSelected = true;
+                selected = selected.right;
+                repaint();
+                break;
+             case KeyEvent.VK_UP:
+                selected.parent.isSelected = true;
+                selected = selected.parent;
+                repaint();
+                break;
+            case KeyEvent.VK_DOWN:
+                Animate(); 
+                break;
+        }
+        
+    }
+    private void Animate(){
+        //Set up timer to drive animation events.
+        timer = new Timer(1000, this);
+        timer.setInitialDelay(5000);
+        timer.start(); 
+        
+    }
+    
+    class Node{
+        Node parent = null;
+        Node left;
+        Node right;
+
+        boolean hasParent = false;
+        int x;
+        int y;
+        int nodeSize;
+        int windowSize;
+        int number;
+        boolean isSelected = false;
+
+        int rotate;
+
+        Node(int x, int y, int windowSize, int nodeSize, int number, int rotate){
+            this.x = x;
+            this.y = y;
+            this.windowSize = windowSize;
+            this.nodeSize = nodeSize;
+            this.number = number;
+            this.rotate = rotate;
+        }
+
+        public Node(double x, double y, int windowSize, int nodeSize, int number, int rotate) {
+            this.x = (int)x;
+            this.y = (int)y;
+            this.windowSize = windowSize;
+            this.nodeSize = nodeSize;
+            this.number = number;
+            this.rotate = rotate;
+        }
+
+    }
+    // private Node createNormalNode(int window){
+
+    //     int size = 50;
+    //     int number = 0;
+    //     Node root = new Node(window/2, 0, window/2, size, 0,0);
+    //     Queue<Node> q = new LinkedList<>();
+    //     q.add(root);
+    //     int[]input = {0,1,2,3,4,5,6,7,8,9,10};
+    //     int index = 0;
+    //     while(!q.isEmpty()){
+            
+    //         Node curr = q.poll();
+
+    //         int newWindowsize = curr.windowSize/2;
+    //         if(index * 2 +1 <= input.length -1){
+
+    //             curr.left = new Node(
+    //                 curr.x - newWindowsize, 
+    //                 curr.y + curr.nodeSize + 100, 
+    //                 newWindowsize, 
+    //                 (int)(curr.nodeSize),
+    //                 index*2 +1, 
+    //                 curr.rotate + 15
+    //                 );
+    //             curr.left.parent = curr;
+    //             curr.left.hasParent = true;
+    //             q.add(curr.left);
+    //         }
+
+    //         if(index * 2 +2 <= input.length -1){
+
+    //             curr.right = new Node(
+    //                 curr.x + newWindowsize, 
+    //                 curr.y + curr.nodeSize + 100, 
+    //                 newWindowsize, 
+    //                 (int)(curr.nodeSize),
+    //                 index*2 +2,
+    //                 curr.rotate -15
+    //             );
+    //             curr.right.parent = curr;
+    //             curr.right.hasParent = true;
+    //             q.add(curr.right);
+    //         }
+
+    //         index++;
+    //     }
+    //     return root;    
+    // } 
+    private Node createNormalNode(int window){
+
+        int size = 50;
+        int number = 0;
+        Node root = new Node(window/2, 50, window/2, size, 0,0);
+        Queue<Node> q = new LinkedList<>();
+        q.add(root);
+        int[]input = {0,1,2,3,4,5,6,7,8,9,10};
+        int index = 0;
+        while(!q.isEmpty()){
+            
+            Node curr = q.poll();
+            int ox = curr.x + curr.nodeSize/2;
+            int oy = curr.y + curr.nodeSize/2;
+            if(index * 2 +1 <= input.length -1){
+
+                curr.left = new Node(
+                    (int) (ox +50 * Math.cos(curr.rotate - 15)- oy + 50 *Math.sin(curr.rotate - 15)),
+                    (int) (ox + 50 *Math.sin(curr.rotate - 15)+ oy + 50 *Math.sin(curr.rotate - 15)),
+                    100, 
+                    (int)(curr.nodeSize),
+                    index*2 +1, 
+                    curr.rotate + 15
+                    );
+                curr.left.parent = curr;
+                curr.left.hasParent = true;
+                q.add(curr.left);
+            }
+
+            if(index * 2 +2 <= input.length -1){
+
+                curr.right = new Node(
+                    (int) (ox+50 *Math.cos(curr.rotate + 15)- oy + 50 *Math.sin(curr.rotate + 15)),
+                    (int) (ox+50 *Math.sin(curr.rotate + 15)+ oy + 50 *Math.sin(curr.rotate + 15)),
+                    100, 
+                    (int)(curr.nodeSize),
+                    index*2 +2,
+                    curr.rotate -15
+                );
+                curr.right.parent = curr;
+                curr.right.hasParent = true;
+                q.add(curr.right);
+            }
+
+            index++;
+        }
+        return root;    
+    } 
+    private Node createShrinkingNodes(int window){
+        int size = 50;
+        int number = 0;
+        Node root = new Node(window/2, 0, window/2, size, 0, 0);
+        Queue<Node> q = new LinkedList<>();
+        q.add(root);
+        int[]input = {0,1,2,3,4,5,6,7,8,9,10};
+        int index = 0;
+        while(!q.isEmpty()){
+            
+            Node curr = q.poll();
+
+            int newWindowsize = curr.windowSize/2;
+            if(index * 2 +1 <= input.length -1){
+
+                curr.left = new Node(
+                    curr.x - newWindowsize, 
+                    curr.y + curr.nodeSize, 
+                    newWindowsize, 
+                    (int)(curr.nodeSize * .8),
+                    index*2 +1,
+                    curr.rotate + 15
+                    );
+                curr.left.parent = curr;
+                q.add(curr.left);
+            }
+
+            if(index * 2 +2 <= input.length -1){
+
+                curr.right = new Node(
+                    curr.x + newWindowsize, 
+                    curr.y + curr.nodeSize, 
+                    newWindowsize, 
+                    (int)(curr.nodeSize * .8),
+                    index*2 +2,
+                    curr.rotate - 15
+                );
+                curr.right.parent = curr;
+                q.add(curr.right);
+            }
+
+            index++;
+        }
+        return root;
+    }
+        
+    private void paintNode(Graphics g, int X, int Y, int size, String count, boolean isSelected, int rotate){
+        Graphics2D g2 = (Graphics2D) g;
+        int square = size;
+        int dia = square/2;
+        int font = dia;
+        // size & color
+        g2.setStroke(new BasicStroke(1.0f));
+        
+
+        // circle
+        if(isSelected){
+            g2.setColor(Color.red);
+            g2.fillOval(X, Y, size, size);
+        }
+        else{
+            g2.setColor(Color.gray);
+            g2.drawOval(X,Y , size, size);
+        }
+
+        // text mod 
+        Font mononoki = new Font("mononoki Nerd Font", Font.PLAIN, font);        
+        g2.setFont(mononoki);
+        g2.setColor(Color.DARK_GRAY);
+        
+        //          str         x                      y 
+        // g2.drawString("1", (3/2 * dia)-(font/4), (3/2 * dia)+(font/2));
+        if(Integer.parseInt(count) < 10)
+            g2.drawString(count, X +(dia/2) + (dia/4), Y +dia+(dia/4));
+
+        else
+        g2.drawString(count, X +(dia/2)  , Y +dia+(dia/4));
+
+    }
+
+
+    private void paintGrid(Graphics g, int scale){
+        int newHeight = this.height/scale;
+        int newWidth = this.width/scale;
+
+        Graphics2D g2 = (Graphics2D) g;
+        g2.setStroke(new BasicStroke(1.0f));
+        g2.setColor(Color.white);
+        for (int i = 0; i < scale; i++) {
+            g2.drawLine( 0,newHeight *i, this.width, newHeight *i);
+        }
+        for (int i = 0; i < scale; i++) {
+            g2.drawLine( newWidth *i,0, newWidth *i, this.height);
+        }
+        
+    }
+    private void paintCornerRay(Graphics g){
+        int scale = 5;
+        int newHeight = this.height/scale;
+        int newWidth = this.width/scale;
+
+        Graphics2D g2 = (Graphics2D) g;
+        g2.setStroke(new BasicStroke(1.0f));
+        g2.setColor(Color.white);
+        for (int i = 0; i < scale; i++) {
+            g2.drawLine( 0,newHeight *i, this.width, this.height);
+        }
+        for (int i = 0; i < scale; i++) {
+            g2.drawLine( newWidth *i,0, this.width, this.height);
+        }
+        
+    }
+    private void doDrawing(Graphics g) {
+
+        Graphics2D g2d = (Graphics2D) g;
+
+        g2d.setColor(Color.blue);
+
+        for (int i = 0; i <= 1000; i++) {
+
+            var size = getSize();
+            var insets = getInsets();
+
+            int w = size.width - insets.left - insets.right;
+            int h = size.height - insets.top - insets.bottom;
+
+            var r = new Random();
+            int x = Math.abs(r.nextInt()) % w;
+            int y = Math.abs(r.nextInt()) % h;
+            g2d.drawLine(x, y, x, y);
+        }
+    }
+
+    @Override
+    public void keyReleased(KeyEvent arg0) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void keyTyped(KeyEvent arg0) {
+        // TODO Auto-generated method stub
+        
+    }
+    private void handler(){
+        selected.isSelected = false;
+        selected.left.isSelected = true;
+        this.selected = selected.left;
+        repaint();
+            
+    }
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        // TODO Auto-generated method stub
+        if(selected.left != null)
+            handler();
+        if(selected.left == null)
+            timer.stop();  
+    }
+}
+
