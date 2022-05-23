@@ -16,9 +16,7 @@ import java.awt.Graphics2D;
 
 import javax.swing.JPanel;
 
-import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.Deque;
 import java.util.List;
 public class myPanel extends JPanel implements KeyListener, ActionListener{
     
@@ -27,14 +25,11 @@ public class myPanel extends JPanel implements KeyListener, ActionListener{
     Node selected;
     Node root;
     Timer timer;
-    Timer timer2;
     List<Block> stackList;
     List<Block> queueList;
     int size;
     ArrayList<List<Cell>> matrix;
-    Queue<Cell> matQueue;
     Cell current;
-    Deque<Block> matQ; 
     myPanel(int width, int height){
 
         this.width = width;
@@ -47,17 +42,13 @@ public class myPanel extends JPanel implements KeyListener, ActionListener{
         
         size = 100;
         // stack block
-        // stackList = new ArrayList<>();
-        // queueList = new LinkedList<>();
-        // createStack();
-        // createQueue();
-        matQueue = new LinkedList<>();
-        matQ = new LinkedList<>();
+        stackList = new ArrayList<>();
+        queueList = new ArrayList<>();
+        createStack();
+        createQueue();
         makeMatrix();
+        matrix.get(0).get(0).current = true;
         current = matrix.get(0).get(0);
-        current.current = true;
-        current.isVisited = true;
-        
     }
 
 
@@ -78,7 +69,6 @@ public class myPanel extends JPanel implements KeyListener, ActionListener{
         // paintMatrixCell(g, size, "10",x,y );
         // paintMatrixCell(g, size, "9",x+ size,y+size);
         matrixController(g);
-        printMatQueue(g);
     }
     private void matrixController(Graphics g){
 
@@ -86,7 +76,7 @@ public class myPanel extends JPanel implements KeyListener, ActionListener{
         
         for (List<Cell> list : matrix) {
             for (Cell cell: list) {
-                paintMatrixCell(g, size, cell.input, cell.x, cell.y,cell.current, cell.isVisited);
+                paintMatrixCell(g, size, cell.input, cell.x, cell.y,cell.current, current.isVisited);
             } 
         }
     }
@@ -97,7 +87,6 @@ public class myPanel extends JPanel implements KeyListener, ActionListener{
         int xoff = 200;
         int yoff = 200;
 
-        
         for (int i = 0; i < 10; i++) {
             List<Cell> temp = new ArrayList<>();
             for (int j = 0; j < 10; j++) {
@@ -108,66 +97,10 @@ public class myPanel extends JPanel implements KeyListener, ActionListener{
             matrix.add(temp);
         }
     }
-    private void matQueueAdd(Cell cell){
-        int x = width-(2*size); 
-        int y = 100;
-
-        if(!matQ.isEmpty()){
-            Block prev = matQ.getLast();
-            Block temp = new Block(cell.input, prev.X, prev.Y + size/2);
-            matQ.add(temp);
-        }
-        else{
-            Block temp = new Block(cell.input, x, y + size/2);
-            matQ.add(temp);
-        }
-
-        matQueue.add(cell);
-        // repaint();       
-    }
-    private void matQueuePoll(){
-        matQ.poll();
-        current.current = false;
-        current = matQueue.poll();
-        current.current = true;
-        
-        for(Block block : matQ){
-            block.Y -= size/2;
-        }
-        // repaint();
-    }
     private void matrixBfs(){
-        int xlen = matrix.get(0).size();
-        int ylen = matrix.size();
-        
-        matQueuePoll();
                            // down    up    right  left 
         int[][] directions = {{0,1},{0,-1},{1,0},{-1,0}};
         
-        for (int i = 0; i < 4; i++) {
-            int newI =  current.i + directions[i][1];    
-            int newJ =  current.j + directions[i][0];    
-            if(newI < ylen && newI >= 0 && newJ < xlen && newJ >= 0 ){
-                Cell curr = matrix.get(newI).get(newJ); 
-                if(!curr.isVisited){
-                    matQueueAdd(curr);
-                    curr.isVisited = true;
-                }
-            } 
-        }
-
-       // loop()
-            // remove from top of queue
-            // move to cell 
-            // get directions
-            // if not <0 || >size
-            // add to queue
-    }
-    
-    private void printMatQueue(Graphics g) {
-        for (Block cell: matQ) {
-            paintStackBlock(g, size, cell.input, cell.X, cell.Y);
-        }
     }
     class Cell{
         int x;
@@ -189,13 +122,12 @@ public class myPanel extends JPanel implements KeyListener, ActionListener{
         Graphics2D g2 = (Graphics2D) g;
 
         g2.setColor(Color.ORANGE);
-        if(curr){
-            g2.fillRect(X, Y, size, size);
-        }
-        else if(isVisited){
+        if(isVisited){
             g2.setColor(Color.lightGray);
             g2.fillRect(X, Y, size, size);
         }
+        else if(curr)
+            g2.fillRect(X, Y, size, size);
         else
             g2.drawRect(X, Y, size, size);
             
@@ -248,7 +180,7 @@ public class myPanel extends JPanel implements KeyListener, ActionListener{
         
     }
     private void queueAdd(String input){
-        Block prev = stackList.get(queueList.size()-1);
+        Block prev = stackList.get(stackList.size()-1);
         Block temp = new Block(input, prev.X, prev.Y + size/2);
         queueList.add(temp);
         repaint();       
@@ -649,10 +581,6 @@ public class myPanel extends JPanel implements KeyListener, ActionListener{
             case KeyEvent.VK_D:
                 matrixMoveRight();
                 break;
-            case KeyEvent.VK_Q:
-                matQueueAdd(current);
-                Animate();
-                break;
         }
     }
     private void matrixMoveLeft() {
@@ -697,7 +625,7 @@ public class myPanel extends JPanel implements KeyListener, ActionListener{
     boolean tempdfs = false;
     private void Animate(){
         //Set up timer to drive animation events.
-        timer = new Timer(2000, this);
+        timer = new Timer(1000, this);
         timer.setInitialDelay(1000);
         timer.start(); 
         
@@ -706,21 +634,15 @@ public class myPanel extends JPanel implements KeyListener, ActionListener{
     @Override
     public void actionPerformed(ActionEvent arg0) {
         // TODO Auto-generated method stub
-        // if(tempdfs){
-        //     dfs();
-        // }
-        // else{
-        //     if(selected.left != null)
-        //         handler();
-        //     if(selected.left == null)
-        //         timer.stop();
-        // }
-        if(!matQ.isEmpty()){
-            matrixBfs();
-            repaint();
+        if(tempdfs){
+            dfs();
         }
-        else
-            timer.stop();
+        else{
+            if(selected.left != null)
+                handler();
+            if(selected.left == null)
+                timer.stop();
+        }
           
     } 
     @Override
