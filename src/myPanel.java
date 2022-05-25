@@ -2,6 +2,9 @@ package src;
 
 
 import javax.swing.Timer;
+
+import src.Components.Node;
+
 import java.awt.*;
 import java.awt.event.*;
 import java.util.Queue;
@@ -27,14 +30,9 @@ public class myPanel extends JPanel implements KeyListener, ActionListener{
     Node selected;
     Node root;
     Timer timer;
-    Timer timer2;
-    List<Block> stackList;
-    List<Block> queueList;
+    
     int size;
-    ArrayList<List<Cell>> matrix;
-    Queue<Cell> matQueue;
-    Cell current;
-    Deque<Block> matQ; 
+     
     myPanel(int width, int height){
 
         this.width = width;
@@ -42,8 +40,8 @@ public class myPanel extends JPanel implements KeyListener, ActionListener{
         this.setFocusable(true);
         this.addKeyListener(this);
         this.setBackground(Color.black);
-        Node root = nodeController(this.width, 100);
-        this.root = root;
+        // Node root = nodeController(this.width, 100);
+        // this.root = root;
         
         size = 100;
         // stack block
@@ -51,13 +49,8 @@ public class myPanel extends JPanel implements KeyListener, ActionListener{
         // queueList = new LinkedList<>();
         // createStack();
         // createQueue();
-        matQueue = new LinkedList<>();
-        matQ = new LinkedList<>();
-        makeMatrix();
-        current = matrix.get(0).get(0);
-        current.current = true;
-        current.isVisited = true;
         
+              
     }
 
 
@@ -77,422 +70,13 @@ public class myPanel extends JPanel implements KeyListener, ActionListener{
         // int size = 100;
         // paintMatrixCell(g, size, "10",x,y );
         // paintMatrixCell(g, size, "9",x+ size,y+size);
-        matrixController(g);
-        printMatQueue(g);
-    }
-    private void matrixController(Graphics g){
-
-        int size = 50;
-        
-        for (List<Cell> list : matrix) {
-            for (Cell cell: list) {
-                paintMatrixCell(g, size, cell.input, cell.x, cell.y,cell.current, cell.isVisited);
-            } 
-        }
-    }
-    private void makeMatrix(){
-        matrix = new ArrayList<>();
-        int size = 50;
-        int count = 0; 
-        int xoff = 200;
-        int yoff = 200;
-
-        
-        for (int i = 0; i < 10; i++) {
-            List<Cell> temp = new ArrayList<>();
-            for (int j = 0; j < 10; j++) {
-                Cell cell = new Cell(xoff+ j*size,yoff + i*size, String.valueOf(count), i, j);
-                temp.add(cell);
-                count++;
-            }            
-            matrix.add(temp);
-        }
-    }
-    private void matQueueAdd(Cell cell){
-        int x = width-(2*size); 
-        int y = 100;
-
-        if(!matQ.isEmpty()){
-            Block prev = matQ.getLast();
-            Block temp = new Block(cell.input, prev.X, prev.Y + size/2);
-            matQ.add(temp);
-        }
-        else{
-            Block temp = new Block(cell.input, x, y + size/2);
-            matQ.add(temp);
-        }
-
-        matQueue.add(cell);
-        // repaint();       
-    }
-    private void matQueuePoll(){
-        matQ.poll();
-        current.current = false;
-        current = matQueue.poll();
-        current.current = true;
-        
-        for(Block block : matQ){
-            block.Y -= size/2;
-        }
-        // repaint();
-    }
-    private void matrixBfs(){
-        int xlen = matrix.get(0).size();
-        int ylen = matrix.size();
-        
-        matQueuePoll();
-                           // down    up    right  left 
-        int[][] directions = {{0,1},{0,-1},{1,0},{-1,0}};
-        
-        for (int i = 0; i < 4; i++) {
-            int newI =  current.i + directions[i][1];    
-            int newJ =  current.j + directions[i][0];    
-            if(newI < ylen && newI >= 0 && newJ < xlen && newJ >= 0 ){
-                Cell curr = matrix.get(newI).get(newJ); 
-                if(!curr.isVisited){
-                    matQueueAdd(curr);
-                    curr.isVisited = true;
-                }
-            } 
-        }
-
-       // loop()
-            // remove from top of queue
-            // move to cell 
-            // get directions
-            // if not <0 || >size
-            // add to queue
+        // matrixController(g);
+        // printMatQueue(g);
     }
     
-    private void printMatQueue(Graphics g) {
-        for (Block cell: matQ) {
-            paintStackBlock(g, size, cell.input, cell.X, cell.Y);
-        }
-    }
-    class Cell{
-        int x;
-        int y;
-        int i;
-        int j;
-        String input;
-        boolean current = false;
-        boolean isVisited = false;
-        Cell(int x, int y, String input, int i, int j){
-            this.x = x;
-            this.y = y;
-            this.input = input;
-            this.i = i;
-            this.j = j;
-        }
-    }
-    private void paintMatrixCell(Graphics g, int size, String input, int X, int Y, boolean curr, boolean isVisited){
-        Graphics2D g2 = (Graphics2D) g;
-
-        g2.setColor(Color.ORANGE);
-        if(curr){
-            g2.fillRect(X, Y, size, size);
-        }
-        else if(isVisited){
-            g2.setColor(Color.lightGray);
-            g2.fillRect(X, Y, size, size);
-        }
-        else
-            g2.drawRect(X, Y, size, size);
-            
-        int space = size/4;
-        // text mod 
-        Font mononoki = new Font("mononoki Nerd Font", Font.PLAIN, (int)(size * 0.6));        
-        g2.setFont(mononoki);
-        g2.setColor(Color.DARK_GRAY);
-        if(Integer.parseInt(input) < 10)
-            g2.drawString(input,  X +(size/2) -(size/8), Y+ size - space);
-
-        else
-            g2.drawString(input, X + (size/6)  , Y + size - space);
-
-
-    }
-
-    // stack & queue
-    Queue<Block> queue;
-    private void queueController(Graphics g) {
-        queue = new LinkedList<>();
-        for (Block block : queueList) {
-            paintStackBlock(g, size, block.input, block.X, block.Y);         
-            queue.add(block);
-        }
-    }
-    private void stackController(Graphics g){
-        Stack<Block> stack = new Stack<>();
-
-        for (Block block : stackList) {
-            paintStackBlock(g, size, block.input, block.X, block.Y);         
-            stack.add(block);
-        }
-
-    }    
-    private void createQueue() {
-        int x = width-(2*size); 
-        int y = 100;
-        Block b;    
-        for (int i = 0; i < 10; i++) {
-            if(queueList.size() == 0){
-                b = new Block(String.valueOf(i), x, y);
-            }
-            else{
-                Block prev = queueList.get(queueList.size() -1);
-                b = new Block(String.valueOf(i), prev.X, prev.Y + size/2  );
-            }
-            queueList.add(b);
-        }
-        
-    }
-    private void queueAdd(String input){
-        Block prev = stackList.get(queueList.size()-1);
-        Block temp = new Block(input, prev.X, prev.Y + size/2);
-        queueList.add(temp);
-        repaint();       
-    }
-    private void queueRemove(){
-        queue.poll();
-        queueList.remove(0);
-        for(Block block : queueList){
-            block.Y -= size/2;
-        }
-        repaint();
-    }
-    private void createStack(){
-        int x = width-(2*size); 
-        int y = height / 2;
-        Block b;    
-        for (int i = 0; i < 10; i++) {
-            if(stackList.size() == 0){
-                b = new Block(String.valueOf(i), x, y);
-            }
-            else{
-                Block prev = stackList.get(stackList.size() -1);
-                b = new Block(String.valueOf(i), prev.X, prev.Y - size/2  );
-            }
-            stackList.add(b);
-        }
-    }
-    private void stackRemove(){
-        if(stackList.size() > 0){
-            stackList.remove(stackList.size() -1);
-        }
-        repaint();
-    }
-    private void stackAdd(String input){
-        Block prev = stackList.get(stackList.size()-1);
-        Block temp = new Block(input, prev.X, prev.Y- size/2);
-        stackList.add(temp);
-        repaint();       
-    }
 
     
-    class Block{
-        int size;
-        String input;
-        int X;
-        int Y;
-        Block(String input, int X, int Y){
-            this.input = input;
-            this.X = X;
-            this.Y = Y;
-        }
-    }
-    private void paintStackBlock(Graphics g, int size, String input, int X, int Y){
-        Graphics2D g2 = (Graphics2D) g;
 
-        int sizeover3 = size/3;
-        int space = sizeover3/4;
-        g2.setColor(Color.ORANGE);
-        g2.drawRect(X, Y, size, sizeover3);
-
-
-        // text mod 
-        Font mononoki = new Font("mononoki Nerd Font", Font.PLAIN, (int)(sizeover3*0.8));        
-        g2.setFont(mononoki);
-        g2.setColor(Color.DARK_GRAY);
-        if(Integer.parseInt(input) < 10)
-            g2.drawString(input,  X +(size/2) -(size/16), Y+sizeover3 - space );
-
-        else
-            g2.drawString(input, X +(size/2) - (size/4) + (size/8)  , Y+sizeover3 - space);
-
-
-    }
-    private void paintNode(Graphics g, int X, int Y, int size, String count, boolean isSelected, boolean isPath){
-        Graphics2D g2 = (Graphics2D) g;
-        int square = size;
-        int dia = square/2;
-        int font = dia;
-
-        // size & color
-        g2.setStroke(new BasicStroke(1.0f));
-
-
-
-        if(isPath){
-            g2.setColor(Color.GRAY);
-            g2.fillOval(X, Y, size, size);
-        }
-        // circle
-        if(isSelected){
-            g2.setColor(Color.red);
-            g2.fillOval(X, Y, size, size);
-        }
-        else{
-            g2.setColor(Color.gray);
-            g2.drawOval(X,Y , size, size);
-        }
-
-        
-        // text mod 
-        Font mononoki = new Font("mononoki Nerd Font", Font.PLAIN, font);        
-        g2.setFont(mononoki);
-        g2.setColor(Color.DARK_GRAY);
-        
-        //          str         x                      y 
-        // g2.drawString("1", (3/2 * dia)-(font/4), (3/2 * dia)+(font/2));
-        if(Integer.parseInt(count) < 10)
-            g2.drawString(count, X +(dia/2) + (dia/4), Y +dia+(dia/4));
-
-        else
-            g2.drawString(count, X +(dia/2)  , Y +dia+(dia/4));
-
-        
-        // corner dot to show x,y
-        g2.fillOval(X, Y, 10, 10);
-    }
-    public void paintController(Graphics g, Node root){
-        Queue<Node> q = new LinkedList<>();
-        q.add(root);
-        Node curr = root;
-        while(!q.isEmpty()){
-            curr = q.poll(); 
-
-            if(curr!=null){
-                // if(curr.hasParent){
-
-                //     drawNewLine(g, curr, curr.parent);
-                //     System.out.println(curr.number);
-                // } 
-                paintNode(g, curr.xPos, curr.yPos, curr.size,String.valueOf(curr.number), curr.isSelected, curr.isPath);
-                q.add(curr.left);
-                q.add(curr.right);
-            }
-        } 
-    }
-    class Node{
-        Node parent = null;
-        Node left;
-        Node right;
-
-        int xPos;
-        int yPos;
-        int size;
-        int number;
-        int window;
-        boolean hasParent = false;
-        boolean isSelected = false; 
-        int rotation;
-        boolean isPath = false;
-        int offset;
-        Node(int x, int y, int size, int number, int window, int rotation, int offset){
-
-            this.xPos = x;
-            this.yPos = y;
-            this.size = size;
-            this.number = number;
-            this.window = window;
-            this.rotation = rotation;
-            this.offset = offset;
-        }
-    }
-    private Node nodeController(int window, int size){
-        int startx = window/2;
-        int starty = window/2;
-        int offset = -width/2;
-        Node root = new Node(startx, 50, 100,0, window/2, 75, offset);
-        root.isSelected = true;
-        selected = root;
-        Queue<Node> q = new LinkedList<>();
-        q.add(root);
-        int rotation = 75;
-        double curve = .5;
-        while(!q.isEmpty()){
-            Node curr = q.poll();
-            if(curr.number * 2 +1 <= 40){
-                makeNode(curr, true, true, rotation, (int)(curr.offset *curve),0, true);
-                q.add(curr.left);
-            }
-            if(curr.number * 2 +2 <= 40){
-                makeNode(curr, true,true, rotation, (int)(curr.offset *curve), 0, false);
-                q.add(curr.right);
-            }
-        }
-        return root;
-    }
-
-    private void makeNode(Node node, boolean s, boolean r, int rotation, int off, int space, boolean left){
-        // s = false not shrinking
-        // s = true shrinking 
-        // boolean r = relative placement
-        
-        int newx;
-        int newy;
-        int size;
-        int newWindow;
-        if(s){
-            size = (int) (node.size*0.8);
-        }
-        else{
-            size = node.size;
-        }
-        if(r){
-            // relative
-            int theta;
-            if(left){
-                theta = node.rotation * -1;
-            }
-            else{
-                theta = node.rotation ;
-            }
-            int ox = node.xPos + node.size/2;
-            int oy = node.yPos + node.size;
-            int x = 0;
-            int y = off;
-            int xoff = (int) ( x*Math.cos(Math.toRadians(theta)) - y*Math.sin(Math.toRadians(theta)));
-            int yoff = (int) ( x*Math.sin(Math.toRadians(theta)) + y*Math.cos(Math.toRadians(theta)));
-            if(left){
-                newx = ox - size + xoff;
-                newy = oy - yoff;
-            }
-            else{
-                newx = ox + xoff;
-                newy = oy - yoff;
-            }
-            newWindow = node.window;
-        }
-        else{
-            newWindow = node.window/2;
-            newx = node.xPos - newWindow;
-            newy = node.yPos + 2*node.size + space;
-        }
-        if(left){
-            node.left = new Node(newx, newy,size,node.number*2+1, newWindow,node.rotation -15, off);
-            node.left.parent = node;
-            node.left.hasParent = true;
-        }
-        else{
-                
-           node.right= new Node(newx, newy,size,node.number*2+2, newWindow, node.rotation -15, off);
-            node.right.parent = node;
-            node.right.hasParent = true;
-        }
-    }
- 
 
     private void paintGrid(Graphics g, int scale){
         int newHeight = this.height/scale;
@@ -529,86 +113,29 @@ public class myPanel extends JPanel implements KeyListener, ActionListener{
             g2d.drawLine(x, y, x, y);
         }
     }
-    private void handler(){
-        selected.isSelected = false;
-        selected.left.isSelected = true;
-        this.selected = selected.left;
-        repaint();
-    }
     
-    Stack<Node> treeStack;
-    private void dfs(){
-
-        if(moveUP == true){
-            moveUp();
-            moveUP = false;
-        }
-        else{
-            Node curr = treeStack.pop();  
-            changeSelected(curr);
-            if(curr.right != null){
-                treeStack.push(curr.right);
-            }
-            if(curr.left != null){
-                treeStack.push(curr.left);
-            }
-            if(curr.left == null && curr.right == null){
-                if(curr.parent == null){
-                    timer.stop();
-                    return;
-                }
-                moveUP = true;
-            }
-        }
-
-
-        repaint();
-    }
-    private void printStack(){
-    }
-    boolean moveUP = false;
-    private void changeSelected(Node curr){
-        selected.isPath = true;
-        selected.isSelected = false;
-        selected = curr;
-        curr.isSelected = true;
-    }
-
-    private void moveUp(){
-        this.selected.isSelected = false; 
-        changeSelected(selected.parent); 
-        selected.isPath = false;
-    }
-    private void handle(){
-        if(!treeStack.isEmpty()){
-            dfs();
-        }
-        else{
-            timer.stop();
-        }
-    }
     @Override
     public void keyPressed(KeyEvent e) {
 
         if(this.timer != null) timer.stop();
-        selected.isSelected = false;
+        // selected.isSelected = false;
         System.out.println(e.getKeyCode());
         int key = e.getKeyCode();
         Scanner scan; 
         switch (key){
             case KeyEvent.VK_LEFT:
-                selected.left.isSelected = true;
-                selected = selected.left;
+                // selected.left.isSelected = true;
+                // selected = selected.left;
                 repaint();
                 break;
             case KeyEvent.VK_RIGHT:
-                selected.right.isSelected = true;
-                selected = selected.right;
+                // selected.right.isSelected = true;
+                // selected = selected.right;
                 repaint();
                 break;
              case KeyEvent.VK_UP:
-                selected.parent.isSelected = true;
-                selected = selected.parent;
+                // selected.parent.isSelected = true;
+                // selected = selected.parent;
                 repaint();
                 break;
             case KeyEvent.VK_DOWN:
@@ -616,84 +143,46 @@ public class myPanel extends JPanel implements KeyListener, ActionListener{
                 break;
             case KeyEvent.VK_E:
                 tempdfs = true; 
-                treeStack = new Stack<>();
-                treeStack.add(this.selected);
+                // treeStack = new Stack<>();
+                // treeStack.add(this.selected);
                 Animate(); 
                 break;
             case KeyEvent.VK_T:
-                stackRemove();
+                // stackRemove();
                 break;
             case KeyEvent.VK_R:
                 scan = new Scanner(System.in);
                 System.out.println("insert num");
                 String input = scan.nextLine();
-                stackAdd(input);
+                // stackAdd(input);
                 break;
             case KeyEvent.VK_F:
-                queueRemove();
+                // queueRemove();
                 break;
             case KeyEvent.VK_G:
                 scan = new Scanner(System.in);
                 System.out.println("insert num");
                 String in = scan.nextLine();
-                queueAdd(in);
+                // queueAdd(in);
             case KeyEvent.VK_W:
-                matrixMoveUp();
+                // matrixMoveUp();
                 break;
             case KeyEvent.VK_A:
-                matrixMoveLeft();
+                // matrixMoveLeft();
                 break;
             case KeyEvent.VK_S:
-                matrixMoveDown();
+                // matrixMoveDown();
                 break;
             case KeyEvent.VK_D:
-                matrixMoveRight();
+                // matrixMoveRight();
                 break;
             case KeyEvent.VK_Q:
-                matQueueAdd(current);
+                // matQueueAdd(current);
                 Animate();
                 break;
         }
     }
-    private void matrixMoveLeft() {
-
-        if(current.j-1 >= 0){
-            current.current = false;
-            current = matrix.get(current.i).get(current.j-1);
-            current.current = true;
-            repaint(); 
-        }
-    }
-
-
-    private void matrixMoveDown() {
-        if(current.i+1 < matrix.size()){
-            current.current = false;
-            current = matrix.get(current.i+1).get(current.j);
-            current.current = true;
-            repaint();
-        }
-    }
-
-
-    private void matrixMoveRight() {
-        if(current.j+1 < matrix.get(0).size()){
-            current.current = false;
-            current = matrix.get(current.i).get(current.j+1);
-            current.current = true;
-            repaint();
-        }
-    }
-
-
-    private void matrixMoveUp(){
-        if(current.i -1 >= 0){
-            current.current = false;
-            current = matrix.get(current.i-1).get(current.j);
-            current.current = true;
-            repaint();
-        }
-    }
+    
     boolean tempdfs = false;
     private void Animate(){
         //Set up timer to drive animation events.
@@ -715,12 +204,12 @@ public class myPanel extends JPanel implements KeyListener, ActionListener{
         //     if(selected.left == null)
         //         timer.stop();
         // }
-        if(!matQ.isEmpty()){
-            matrixBfs();
-            repaint();
-        }
-        else
-            timer.stop();
+        // if(!matQ.isEmpty()){
+            // matrixBfs();
+            // repaint();
+        // }
+        // else
+            // timer.stop();
           
     } 
     @Override
