@@ -9,6 +9,7 @@ import java.util.Stack;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 
+import javax.swing.JComponent;
 import javax.swing.JPanel;
 
 import java.util.ArrayDeque;
@@ -17,47 +18,55 @@ import java.util.Deque;
 import java.util.List;
 
 // stack & queue
-public class StackController {
-    List<Block> stackList;
+public class StackController extends JComponent{
+    Deque<Block> stackList;
+    Deque<Node> stack;
+
     int size; 
     int width;
     int height;
-    private void stackController(Graphics g){
-        Stack<Block> stack = new Stack<>();
+    public StackController(int width, int heigth, int size){
+        stackList = new LinkedList<>();
+        stack = new LinkedList<>();
+        this.size = size; 
+        this.width = width;
+        this.height = heigth;
+    }
+    public void paintComponent(Graphics g){
+        // super.paintComponent(g);
+        paintBlocks(g);
+    }
+  
+    private void paintBlocks(Graphics g){
 
         for (Block block : stackList) {
             paintStackBlock(g, size, block.input, block.x, block.y);         
-            stack.add(block);
         }
 
     }    
-    
-    private void createStack(){
+    public void stackAdd(Node node){
         int x = width-(2*size); 
         int y = height / 2;
         Block b;    
-        for (int i = 0; i < 10; i++) {
-            if(stackList.size() == 0){
-                b = new Block(String.valueOf(i), x, y,size);
-            }
-            else{
-                Block prev = stackList.get(stackList.size() -1);
-                b = new Block(String.valueOf(i), prev.x, prev.y - size/2,size );
-            }
-            stackList.add(b);
+        if(stackList.size() == 0){
+            b = new Block(String.valueOf(node.number), x, y,size);
         }
-    }
-    private void stackRemove(){
-        if(stackList.size() > 0){
-            stackList.remove(stackList.size() -1);
+        else{
+            Block prev = stackList.getFirst();
+            b = new Block(String.valueOf(node.number), prev.x, prev.y - size/2,size);
         }
+        stackList.push(b);
+        stack.push(node);
     }
-    private void stackAdd(String input){
-        Block prev = stackList.get(stackList.size()-1);
-        Block temp = new Block(input, prev.x, prev.y- size/2, size);
-        stackList.add(temp);
-    }
+    public Node stackRemove(){
+        if(!stackList.isEmpty()){
+            stackList.pop();
+            return stack.poll();
+        }
+        return null;
 
+    }
+    
     
     private void paintStackBlock(Graphics g, int size, String input, int X, int Y){
         Graphics2D g2 = (Graphics2D) g;

@@ -17,13 +17,13 @@ import java.util.Deque;
 import java.util.List;
 
 
-public class QueueController extends JComponent{
+public class MatrixQueueController extends JComponent{
     
     int size;
     int width;
     List<Block> queueList;
-    Deque<Node> queue;
-    public QueueController(int width, int size){
+    Deque<Cell> queue;
+    public MatrixQueueController(int width, int size){
         queueList = new LinkedList<>();
         queue = new LinkedList<>();
         this.width = width;
@@ -38,21 +38,21 @@ public class QueueController extends JComponent{
             paintStackBlock(g, size, block.input, block.x, block.y);         
         }
     }
-    public void queueAdd(Node node){
+    public void queueAdd(Cell cell){
         int x = width-(2*size); 
         int y = 100;
         Block b;    
         if(queueList.size() == 0){
-            b = new Block(String.valueOf(node.number), x, y,size);
+            b = new Block(cell.input, x, y,size);
         }
         else{
             Block prev = queueList.get(queueList.size() -1);
-            b = new Block(String.valueOf(node.number), prev.x, prev.y + size/2,size);
+            b = new Block(cell.input, prev.x, prev.y + size/2,size);
         }
         queueList.add(b);
-        queue.add(node);
+        queue.add(cell);
     }
-    public Node queueRemove(){
+    public Cell queueRemove(){
         if(!queueList.isEmpty()){
             queueList.remove(0);
             for(Block block : queueList){

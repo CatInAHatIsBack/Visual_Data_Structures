@@ -1,4 +1,5 @@
 package src.Components;
+
 import java.awt.*;
 import java.awt.Color;
 import java.util.LinkedList;
@@ -16,53 +17,57 @@ import java.util.ArrayList;
 import java.util.Deque;
 import java.util.List;
 
+// stack & queue
+public class MatrixStackController extends JComponent{
+    Deque<Block> stackList;
+    Deque<Cell> stack;
 
-public class QueueController extends JComponent{
-    
-    int size;
+    int size; 
     int width;
-    List<Block> queueList;
-    Deque<Node> queue;
-    public QueueController(int width, int size){
-        queueList = new LinkedList<>();
-        queue = new LinkedList<>();
-        this.width = width;
+    int height;
+    public MatrixStackController(int width, int heigth, int size){
+        stackList = new LinkedList<>();
+        stack = new LinkedList<>();
         this.size = size; 
+        this.width = width;
+        this.height = heigth;
     }
     public void paintComponent(Graphics g){
         // super.paintComponent(g);
         paintBlocks(g);
     }
-    public void paintBlocks(Graphics g) {
-        for (Block block : queueList) {
+  
+    private void paintBlocks(Graphics g){
+
+        for (Block block : stackList) {
             paintStackBlock(g, size, block.input, block.x, block.y);         
         }
-    }
-    public void queueAdd(Node node){
+
+    }    
+    public void stackAdd(Cell cell){
         int x = width-(2*size); 
-        int y = 100;
+        int y = height / 2;
         Block b;    
-        if(queueList.size() == 0){
-            b = new Block(String.valueOf(node.number), x, y,size);
+        if(stackList.size() == 0){
+            b = new Block(cell.input, x, y,size);
         }
         else{
-            Block prev = queueList.get(queueList.size() -1);
-            b = new Block(String.valueOf(node.number), prev.x, prev.y + size/2,size);
+            Block prev = stackList.getFirst();
+            b = new Block(cell.input, prev.x, prev.y - size/2,size);
         }
-        queueList.add(b);
-        queue.add(node);
+        stackList.push(b);
+        stack.push(cell);
     }
-    public Node queueRemove(){
-        if(!queueList.isEmpty()){
-            queueList.remove(0);
-            for(Block block : queueList){
-                block.y -= size/2;
-            }
-            return queue.poll();
+    public Cell stackRemove(){
+        if(!stackList.isEmpty()){
+            stackList.pop();
+            return stack.poll();
         }
         return null;
 
     }
+    
+    
     private void paintStackBlock(Graphics g, int size, String input, int X, int Y){
         Graphics2D g2 = (Graphics2D) g;
 
@@ -84,4 +89,5 @@ public class QueueController extends JComponent{
 
 
     }
+    
 }

@@ -33,11 +33,13 @@ public class Binary_Tree extends JPanel implements ActionListener{
     double shrinkage = 0.7;
     Timer timer;
     int neg = 10;
+    QueueController queue;
+    StackController stack;
     public Binary_Tree(int width, int height){
         this.width = width;
         this.height = height;
         nodes = new ArrayList<>(); 
-        // makeRoot(3);
+        
     }
     public Binary_Tree(int width, int height, int[] array){
         this.width = width;
@@ -46,30 +48,19 @@ public class Binary_Tree extends JPanel implements ActionListener{
         nodes = new ArrayList<>(); 
 
         this.setFocusable(true);
-        this.setBackground(Color.green);
+        this.setBackground(Color.black);
         this.setVisible(true);
 
         insertNodes(array); 
-        treeStack = new Stack<>();
-        
+        // queue = new QueueController(width - 100, 100); 
+        // this.add(queue);
+        // queue.queueAdd(root);
+        stack = new StackController(width - 100, height*2/3, 100);
+        this.add(stack);
+        stack.stackAdd(root);
     }
-    public void paintComponent(Graphics g){
-        super.paintComponent(g);
-        paintController(g, this.root);
-    }
-    public void clicked(){
-        this.setBackground(Color.BLACK);
-        treeStack.add(root);
-        Animate(); 
-
-    }
-    private void Animate(){
-        //Set up timer to drive animation events.
-        timer = new Timer(200, this);
-        timer.setInitialDelay(1000);
-        timer.start(); 
-        
-    }
+    
+    
     private void insertNode(int input){
         if(nodes.size() == 0){
             makeRoot(input);
@@ -210,16 +201,28 @@ public class Binary_Tree extends JPanel implements ActionListener{
     }
    
     
-    Stack<Node> treeStack;
-    private void dfs(){
-
-        Node curr = treeStack.pop();  
+    public void dfs(){
+        Node curr = stack.stackRemove();  
         changeSelected(curr);
         if(curr.right != null){
-            treeStack.push(curr.right);
+            stack.stackAdd(curr.right);
         }
         if(curr.left != null){
-            treeStack.push(curr.left);
+            stack.stackAdd(curr.left);
+        }
+        if(curr.left == null && curr.right == null){
+            return;
+        }
+    }
+    public void bfs(){
+        
+        Node curr = queue.queueRemove();  
+        changeSelected(curr);
+        if(curr.left != null){
+            queue.queueAdd(curr.left);
+        }
+        if(curr.right != null){
+            queue.queueAdd(curr.right);
         }
         if(curr.left == null && curr.right == null){
             return;
@@ -239,10 +242,6 @@ public class Binary_Tree extends JPanel implements ActionListener{
         changeSelected(selected.parent); 
         selected.isPath = false;
     }
-    private void handle(){
-        
-    }
-    
     private void paintNode(Graphics g, int X, int Y, int size, String count, boolean isSelected, boolean isPath){
         Graphics2D g2 = (Graphics2D) g;
         int square = size;
@@ -284,14 +283,13 @@ public class Binary_Tree extends JPanel implements ActionListener{
         // corner dot to show x,y
         g2.fillOval(X, Y, size/10, size/10);
     }
-    int index = 0;
     @Override
     public void actionPerformed(ActionEvent arg0) {
-        if(!treeStack.isEmpty()){
-            dfs();
+        if(!queue.queue.isEmpty()){
+            bfs();
         }
         else{
-            // timer.stop();
+            pause();
         }
         repaint();
         
@@ -299,7 +297,24 @@ public class Binary_Tree extends JPanel implements ActionListener{
     private void pause(){
         this.timer = null;
     }
-   
+    public void clicked(){
+        this.setBackground(Color.blue);
+        queue.queueAdd(root);
+        Animate(); 
+
+    }
+    private void Animate(){
+        //Set up timer to drive animation events.
+        timer = new Timer(1000, this);
+        timer.setInitialDelay(1000);
+        timer.start(); 
+        
+    }  
     
-    
+    public void paintComponent(Graphics g){
+        super.paintComponent(g);
+        paintController(g, this.root);
+        // queue.paintComponent(g);
+        stack.paintComponent(g);
+    }   
 }

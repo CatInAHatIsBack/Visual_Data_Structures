@@ -8,6 +8,7 @@ public class Cell {
     String input;
     boolean current = false;
     boolean isVisited = false;
+    boolean gray = false;
     Cell(int x, int y, String input, int i, int j){
         this.x = x;
         this.y = y;

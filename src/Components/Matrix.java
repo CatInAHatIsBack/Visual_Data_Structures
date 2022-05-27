@@ -16,39 +16,48 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
 import java.util.List;
-public class Matrix_Controller {
+public class Matrix extends JPanel{
     int width;
     int size;
     int height;
-    ArrayList<List<Cell>> matrix;
-    Queue<Cell> matQueue;
     Cell current;
-    Deque<Block> matQ;
+    Cell corner;
+    ArrayList<List<Cell>> matrix;
+    MatrixQueueController queue;
+    MatrixStackController stack;
+
+    public Matrix(int width, int height, int size){
+        this.width = width;
+        this.height = height;
+        this.size = size;            
+         this.setFocusable(true);
+        this.setBackground(Color.black);
+        this.setVisible(true);
+        init();
+
+        queue = new MatrixQueueController(width - 100, 100); 
+        this.add(queue);
+        queue.queueAdd(corner);
+
+        stack = new MatrixStackController(width - 100, height*2/3, 100);
+        this.add(stack);
+        stack.stackAdd(corner);
+
+    }
     private void init(){
-        matQueue = new LinkedList<>();
-        matQ = new LinkedList<>();
         makeMatrix();
         current = matrix.get(0).get(0);
         current.current = true;
         current.isVisited = true;
+        corner = current;
  
     }
-    private void matrixController(Graphics g){
-
-        int size = 50;
-        
-        for (List<Cell> list : matrix) {
-            for (Cell cell: list) {
-                paintMatrixCell(g, size, cell.input, cell.x, cell.y,cell.current, cell.isVisited);
-            } 
-        }
-    }
+    
     private void makeMatrix(){
         matrix = new ArrayList<>();
-        int size = 50;
         int count = 0; 
-        int xoff = 200;
-        int yoff = 200;
+        int xoff = 100;
+        int yoff = 100;
 
         
         for (int i = 0; i < 10; i++) {
@@ -61,39 +70,18 @@ public class Matrix_Controller {
             matrix.add(temp);
         }
     }
-    private void matQueueAdd(Cell cell){
-        int x = width-(2*size); 
-        int y = 100;
-
-        if(!matQ.isEmpty()){
-            Block prev = matQ.getLast();
-            Block temp = new Block(cell.input, prev.x, prev.y + size/2,size);
-            matQ.add(temp);
-        }
-        else{
-            Block temp = new Block(cell.input, x, y + size/2,size);
-            matQ.add(temp);
-        }
-
-        matQueue.add(cell);
-        // repaint();       
-    }
-    private void matQueuePoll(){
-        matQ.poll();
+    
+    private void changeSelected(Cell curr){
+        current.gray = true;
         current.current = false;
-        current = matQueue.poll();
-        current.current = true;
-        
-        for(Block block : matQ){
-            block.y -= size/2;
-        }
-        // repaint();
+        current = curr;
+        curr.current = true;
     }
-    private void matrixBfs(){
+    
+    public void matrixDFS(){
         int xlen = matrix.get(0).size();
         int ylen = matrix.size();
-        
-        matQueuePoll();
+        changeSelected(stack.stackRemove());
                            // down    up    right  left 
         int[][] directions = {{0,1},{0,-1},{1,0},{-1,0}};
         
@@ -103,7 +91,26 @@ public class Matrix_Controller {
             if(newI < ylen && newI >= 0 && newJ < xlen && newJ >= 0 ){
                 Cell curr = matrix.get(newI).get(newJ); 
                 if(!curr.isVisited){
-                    matQueueAdd(curr);
+                    stack.stackAdd(curr);
+                    curr.isVisited = true;
+                }
+            } 
+        }
+    }
+    public void matrixBFS(){
+        int xlen = matrix.get(0).size();
+        int ylen = matrix.size();
+        changeSelected(queue.queueRemove());
+                           // down    up    right  left 
+        int[][] directions = {{0,1},{0,-1},{1,0},{-1,0}};
+        
+        for (int i = 0; i < 4; i++) {
+            int newI =  current.i + directions[i][1];    
+            int newJ =  current.j + directions[i][0];    
+            if(newI < ylen && newI >= 0 && newJ < xlen && newJ >= 0 ){
+                Cell curr = matrix.get(newI).get(newJ); 
+                if(!curr.isVisited){
+                    queue.queueAdd(curr);
                     curr.isVisited = true;
                 }
             } 
@@ -143,7 +150,6 @@ public class Matrix_Controller {
         }
     }
 
-
     private void matrixMoveUp(){
         if(current.i -1 >= 0){
             current.current = false;
@@ -151,19 +157,15 @@ public class Matrix_Controller {
             current.current = true;
         }
     }
-    private void printMatQueue(Graphics g) {
-        for (Block cell: matQ) {
-            // paintStackBlock(g, size, cell.input, cell.x, cell.y);
-        }
-    }
-    private void paintMatrixCell(Graphics g, int size, String input, int X, int Y, boolean curr, boolean isVisited){
+    
+    private void paintMatrixCell(Graphics g, int size, String input, int X, int Y, boolean curr, boolean gray){
         Graphics2D g2 = (Graphics2D) g;
 
         g2.setColor(Color.ORANGE);
         if(curr){
             g2.fillRect(X, Y, size, size);
         }
-        else if(isVisited){
+        else if(gray){
             g2.setColor(Color.lightGray);
             g2.fillRect(X, Y, size, size);
         }
@@ -180,8 +182,19 @@ public class Matrix_Controller {
 
         else
             g2.drawString(input, X + (size/6)  , Y + size - space);
-
-
     }
-    
+    private void matrixController(Graphics g){
+
+        for (List<Cell> list : matrix) {
+            for (Cell cell: list) {
+                paintMatrixCell(g, size, cell.input, cell.x, cell.y,cell.current, cell.gray);
+            } 
+        }
+    }
+    public void paintComponent(Graphics g){
+        super.paintComponent(g);
+        matrixController(g);
+        queue.paintComponent(g);
+        // stack.paintComponent(g);
+    }
 }
