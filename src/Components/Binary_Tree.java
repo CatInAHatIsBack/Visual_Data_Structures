@@ -37,17 +37,21 @@ public class Binary_Tree extends JPanel implements ActionListener{
         this.width = width;
         this.height = height;
         nodes = new ArrayList<>(); 
+        // makeRoot(3);
+    }
+    public Binary_Tree(int width, int height, int[] array){
+        this.width = width;
+        this.height= height;
+        this.array = array;
+        nodes = new ArrayList<>(); 
+
         this.setFocusable(true);
         this.setBackground(Color.green);
         this.setVisible(true);
-        makeRoot(3);
-    }
-    Binary_Tree(int width, int height, int[] array){
-        this.width = width;
-        this.width = height;
-        this.array = array;
-        nodes = new ArrayList<>(); 
+
         insertNodes(array); 
+        treeStack = new Stack<>();
+        
     }
     public void paintComponent(Graphics g){
         super.paintComponent(g);
@@ -55,7 +59,9 @@ public class Binary_Tree extends JPanel implements ActionListener{
     }
     public void clicked(){
         this.setBackground(Color.BLACK);
+        treeStack.add(root);
         Animate(); 
+
     }
     private void Animate(){
         //Set up timer to drive animation events.
@@ -87,6 +93,18 @@ public class Binary_Tree extends JPanel implements ActionListener{
                 temp = curr.left;
             }
             curr = temp;
+        }
+    }
+    private void insertNodes(int[] array){
+        if(array.length > 0){
+            for (int i = 0; i < array.length; i++) {
+                if(nodes.size() == 0){
+                    makeRoot(array[i]);
+                }
+                else{
+                    insertNode(array[i]);
+                }
+            }
         }
     }
     
@@ -132,35 +150,13 @@ public class Binary_Tree extends JPanel implements ActionListener{
         int rotation = 80;
         int size = 100;
         int startx = width/2;
-        Node temp = new Node(startx-size, starty, size, i, 0, rotation, offset);
+        Node temp = new Node(startx- size/2, starty, size, i, 0, rotation, offset);
         nodes.add(temp);
         root = temp;
         root.isSelected = true;
         selected = root;
     }
-    private void insertNodes(int[] array){
-        if(array.length > 0){
-            for (int i = 0; i < array.length; i++) {
-                if(nodes.size() == 0){
-                    makeRoot(array[i]);
-                }
-                else{
-                    int par = (i-1)/2;
-                    Node parent = nodes.get(par); 
-                    
-                    int currLeft = parent.number*2+1;
-                    int currRight = parent.number*2+2;
-
-                    if(currLeft < array.length){
-                        insertLeft(parent, array[i]); 
-                    }
-                    if(currRight < array.length){
-                        insertRight(parent, array[i]); 
-                    }
-                }
-            }
-        }
-    }
+    
 
     
     
@@ -212,35 +208,21 @@ public class Binary_Tree extends JPanel implements ActionListener{
             }
         } 
     }
-    private void handler(){
-        selected.isSelected = false;
-        selected.left.isSelected = true;
-        this.selected = selected.left;
-    }
+   
     
     Stack<Node> treeStack;
     private void dfs(){
 
-        if(moveUP == true){
-            moveUp();
-            moveUP = false;
+        Node curr = treeStack.pop();  
+        changeSelected(curr);
+        if(curr.right != null){
+            treeStack.push(curr.right);
         }
-        else{
-            Node curr = treeStack.pop();  
-            changeSelected(curr);
-            if(curr.right != null){
-                treeStack.push(curr.right);
-            }
-            if(curr.left != null){
-                treeStack.push(curr.left);
-            }
-            if(curr.left == null && curr.right == null){
-                if(curr.parent == null){
-                    // timer.stop();
-                    return;
-                }
-                moveUP = true;
-            }
+        if(curr.left != null){
+            treeStack.push(curr.left);
+        }
+        if(curr.left == null && curr.right == null){
+            return;
         }
 
     }
@@ -258,12 +240,7 @@ public class Binary_Tree extends JPanel implements ActionListener{
         selected.isPath = false;
     }
     private void handle(){
-        if(!treeStack.isEmpty()){
-            dfs();
-        }
-        else{
-            // timer.stop();
-        }
+        
     }
     
     private void paintNode(Graphics g, int X, int Y, int size, String count, boolean isSelected, boolean isPath){
@@ -310,11 +287,11 @@ public class Binary_Tree extends JPanel implements ActionListener{
     int index = 0;
     @Override
     public void actionPerformed(ActionEvent arg0) {
-        Random random = new Random(); 
-        if(index >= 30)
-            pause();
+        if(!treeStack.isEmpty()){
+            dfs();
+        }
         else{
-            insertNode(random.nextInt(99));
+            // timer.stop();
         }
         repaint();
         

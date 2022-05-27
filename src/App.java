@@ -4,6 +4,7 @@ import javax.swing.*;
 import src.Components.Binary_Tree;
 
 import java.awt.event.*;
+import java.util.Random;
 import java.util.Scanner;
 import java.awt.*;
 
@@ -22,11 +23,16 @@ public class App extends JFrame implements KeyListener{
     public App(String title, int width, int height) {
         // create the window frame
         createWindow(title, width, height);
-
+        int len = 30;
+        int[] input = new int[len];
         // add components to the window
-        tree = new Binary_Tree(width, height);
         // this.add(new myPanel(width, height));
-        
+        Random random = new Random(); 
+        for (int i = 0; i < len; i++) {
+            input[i] = random.nextInt(99);
+        }
+        // tree = new Binary_Tree(width, height);
+        tree = new Binary_Tree(width, height, input);
         this.addKeyListener(this);
         this.add(tree);
         this.setLocation(0, 0);
