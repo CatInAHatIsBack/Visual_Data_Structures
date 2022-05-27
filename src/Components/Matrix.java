@@ -1,20 +1,13 @@
 package src.Components;
-import java.util.Queue;
 
 import java.awt.*;
 import java.awt.Color;
-import java.util.LinkedList;
-import java.util.Random;
-import java.util.Scanner;
-import java.util.Stack;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 
 import javax.swing.JPanel;
 
-import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.Deque;
 import java.util.List;
 public class Matrix extends JPanel{
     int width;
