@@ -12,19 +12,21 @@ public class Node extends JComponent{
     int yPos;
     int size;
     int number;
-    int window;
+    int index;
     boolean hasParent = false;
     boolean isSelected = false; 
     int rotation;
     boolean isPath = false;
     int offset;
-    Node(int x, int y, int size, int number, int window, int rotation, int offset){
+    Node(int x, int y,
+         int size, int number, 
+         int index, int rotation, int offset){
 
         this.xPos = x;
         this.yPos = y;
         this.size = size;
         this.number = number;
-        this.window = window;
+        this.index = index;
         this.rotation = rotation;
         this.offset = offset;
     }

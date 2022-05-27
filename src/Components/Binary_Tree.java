@@ -1,6 +1,8 @@
 package src.Components;
 import java.util.Queue;
 
+import javax.swing.Timer;
+import java.awt.event.*;
 import java.awt.*;
 import java.awt.Color;
 import java.util.LinkedList;
@@ -10,49 +12,187 @@ import java.util.Stack;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 
+import javax.swing.JComponent;
 import javax.swing.JPanel;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Deque;
 import java.util.List;
 
 
-public class Binary_Tree {
+public class Binary_Tree extends JPanel implements ActionListener{
     int width;
     int height;
     int[] array;
+    Node root;
     Node selected;
-    Binary_Tree(){
+    List<Node> nodes;
+    double curve = .5;
+    double shrinkage = 0.7;
+    Timer timer;
+    int neg = 10;
+    public Binary_Tree(int width, int height){
+        this.width = width;
+        this.height = height;
+        nodes = new ArrayList<>(); 
+        this.setFocusable(true);
+        this.setBackground(Color.green);
+        this.setVisible(true);
+        makeRoot(3);
+    }
+    Binary_Tree(int width, int height, int[] array){
+        this.width = width;
+        this.width = height;
+        this.array = array;
+        nodes = new ArrayList<>(); 
+        insertNodes(array); 
+    }
+    public void paintComponent(Graphics g){
+        super.paintComponent(g);
+        paintController(g, this.root);
+    }
+    public void clicked(){
+        this.setBackground(Color.BLACK);
+        Animate(); 
+    }
+    private void Animate(){
+        //Set up timer to drive animation events.
+        timer = new Timer(200, this);
+        timer.setInitialDelay(1000);
+        timer.start(); 
         
     }
-    Binary_Tree(int[] array){
-        this.array = array;
+    private void insertNode(int input){
+        if(nodes.size() == 0){
+            makeRoot(input);
+            return;
+        }
+        Node curr = root;
+        while(curr != null){
+            Node temp = null;
+            if( input > curr.number){
+                if(curr.right == null){
+                    insertRight(curr, input); 
+                    break;
+                }
+                temp = curr.right;
+            }
+            if( input < curr.number){
+                if(curr.left == null){
+                    insertLeft(curr, input); 
+                    break;
+                }
+                temp = curr.left;
+            }
+            curr = temp;
+        }
     }
-    private Node nodeController(int window, int size){
-        int startx = window/2;
-        int starty = window/2;
+    
+    private void moveRight() {
+
+    }
+    private void moveLeft() {
+    }
+    private void insertLeft(Node curr, int input){
+
+        Point point;
+
+        int theta = curr.rotation;
+        int currLeft = curr.number*2+1;
+        int off = (int)(curr.offset * curve);
+        int newRotation =  theta-neg;
+        point = makeNode(curr, off, newRotation * -1);
+        point.x -= curr.size;
+        int size = (int) (curr.size*shrinkage);
+        Node lNode= new Node(point.x, point.y,size,input, currLeft,newRotation, off);
+        curr.left = lNode;
+        curr.left.parent = lNode;
+        curr.left.hasParent = true;
+   
+    }
+    private void insertRight(Node curr, int input){
+        Point point;
+        int theta = curr.rotation;
+        int currRight = curr.number*2+2;
+        int off = (int)(curr.offset * curve);
+        int newRotation =  theta-neg;
+        point = makeNode(curr, off, newRotation);
+        int size = (int) (curr.size*shrinkage);
+        Node rNode= new Node(point.x, point.y,size,input, currRight,newRotation, off);
+        curr.right = rNode;
+        curr.right.parent = rNode;
+        curr.right.hasParent = true;
+
+    }
+    private void makeRoot(int i){
+        int starty = 100;
         int offset = -width/2;
-        Node root = new Node(startx, 50, 100,0, window/2, 75, offset);
+        int rotation = 80;
+        int size = 100;
+        int startx = width/2;
+        Node temp = new Node(startx-size, starty, size, i, 0, rotation, offset);
+        nodes.add(temp);
+        root = temp;
         root.isSelected = true;
         selected = root;
-        Queue<Node> q = new LinkedList<>();
-        q.add(root);
-        int rotation = 75;
-        double curve = .5;
-        while(!q.isEmpty()){
-            Node curr = q.poll();
-            if(curr.number * 2 +1 <= 40){
-                makeNode(curr, true, true, rotation, (int)(curr.offset *curve),0, true);
-                q.add(curr.left);
-            }
-            if(curr.number * 2 +2 <= 40){
-                makeNode(curr, true,true, rotation, (int)(curr.offset *curve), 0, false);
-                q.add(curr.right);
+    }
+    private void insertNodes(int[] array){
+        if(array.length > 0){
+            for (int i = 0; i < array.length; i++) {
+                if(nodes.size() == 0){
+                    makeRoot(array[i]);
+                }
+                else{
+                    int par = (i-1)/2;
+                    Node parent = nodes.get(par); 
+                    
+                    int currLeft = parent.number*2+1;
+                    int currRight = parent.number*2+2;
+
+                    if(currLeft < array.length){
+                        insertLeft(parent, array[i]); 
+                    }
+                    if(currRight < array.length){
+                        insertRight(parent, array[i]); 
+                    }
+                }
             }
         }
-        return root;
     }
+
+    
+    
+    private void removeNode(){}
+    
+    private void nodeMoveUp(){}
+
+    private void printTree(){}
+    private void printSearchTree(){}
+
+
+    private Point makeNode(Node node, int off, int theta){
+        
+        int newx;
+        int newy;
+        
+        // middle of bot line
+        int ox = node.xPos + node.size/2;
+        int oy = node.yPos + node.size;
+        // erect negative spacer
+        int x = 0;
+        int y = off;
+        // calculate pos after rotation
+        int xoff = (int) ( x*Math.cos(Math.toRadians(theta)) - y*Math.sin(Math.toRadians(theta)));
+        int yoff = (int) ( x*Math.sin(Math.toRadians(theta)) + y*Math.cos(Math.toRadians(theta)));
+        // apply to x&y
+        newx = ox + xoff;
+        newy = oy - yoff;
+
+        return new Point(newx,newy);
+    }
+    
     public void paintController(Graphics g, Node root){
         Queue<Node> q = new LinkedList<>();
         q.add(root);
@@ -72,107 +212,6 @@ public class Binary_Tree {
             }
         } 
     }
- 
-    private void makeNode(Node node, boolean s, boolean r, int rotation, int off, int space, boolean left){
-        // s = false not shrinking
-        // s = true shrinking 
-        // boolean r = relative placement
-        
-        int newx;
-        int newy;
-        int size;
-        int newWindow;
-        if(s){
-            size = (int) (node.size*0.8);
-        }
-        else{
-            size = node.size;
-        }
-        if(r){
-            // relative
-            int theta;
-            if(left){
-                theta = node.rotation * -1;
-            }
-            else{
-                theta = node.rotation ;
-            }
-            int ox = node.xPos + node.size/2;
-            int oy = node.yPos + node.size;
-            int x = 0;
-            int y = off;
-            int xoff = (int) ( x*Math.cos(Math.toRadians(theta)) - y*Math.sin(Math.toRadians(theta)));
-            int yoff = (int) ( x*Math.sin(Math.toRadians(theta)) + y*Math.cos(Math.toRadians(theta)));
-            if(left){
-                newx = ox - size + xoff;
-                newy = oy - yoff;
-            }
-            else{
-                newx = ox + xoff;
-                newy = oy - yoff;
-            }
-            newWindow = node.window;
-        }
-        else{
-            newWindow = node.window/2;
-            newx = node.xPos - newWindow;
-            newy = node.yPos + 2*node.size + space;
-        }
-        if(left){
-            node.left = new Node(newx, newy,size,node.number*2+1, newWindow,node.rotation -15, off);
-            node.left.parent = node;
-            node.left.hasParent = true;
-        }
-        else{
-                
-           node.right= new Node(newx, newy,size,node.number*2+2, newWindow, node.rotation -15, off);
-            node.right.parent = node;
-            node.right.hasParent = true;
-        }
-    }
-    private void paintNode(Graphics g, int X, int Y, int size, String count, boolean isSelected, boolean isPath){
-        Graphics2D g2 = (Graphics2D) g;
-        int square = size;
-        int dia = square/2;
-        int font = dia;
-
-        // size & color
-        g2.setStroke(new BasicStroke(1.0f));
-
-        if(isPath){
-            g2.setColor(Color.GRAY);
-            g2.fillOval(X, Y, size, size);
-        }
-        // circle
-        if(isSelected){
-            g2.setColor(Color.red);
-            g2.fillOval(X, Y, size, size);
-        }
-        else{
-            g2.setColor(Color.gray);
-            g2.drawOval(X,Y , size, size);
-        }
-
-        
-        // text mod 
-        Font mononoki = new Font("mononoki Nerd Font", Font.PLAIN, font);        
-        g2.setFont(mononoki);
-        g2.setColor(Color.DARK_GRAY);
-        
-        //          str         x                      y 
-        // g2.drawString("1", (3/2 * dia)-(font/4), (3/2 * dia)+(font/2));
-        if(Integer.parseInt(count) < 10)
-            g2.drawString(count, X +(dia/2) + (dia/4), Y +dia+(dia/4));
-
-        else
-            g2.drawString(count, X +(dia/2)  , Y +dia+(dia/4));
-
-        
-        // corner dot to show x,y
-        g2.fillOval(X, Y, 10, 10);
-    }
-   
-    
     private void handler(){
         selected.isSelected = false;
         selected.left.isSelected = true;
@@ -226,4 +265,64 @@ public class Binary_Tree {
             // timer.stop();
         }
     }
+    
+    private void paintNode(Graphics g, int X, int Y, int size, String count, boolean isSelected, boolean isPath){
+        Graphics2D g2 = (Graphics2D) g;
+        int square = size;
+        int dia = square/2;
+        int font = dia;
+
+        // size & color
+        g2.setStroke(new BasicStroke(1.0f));
+
+        if(isPath){
+            g2.setColor(Color.GRAY);
+            g2.fillOval(X, Y, size, size);
+        }
+        // circle
+        if(isSelected){
+            g2.setColor(Color.red);
+            g2.fillOval(X, Y, size, size);
+        }
+        else{
+            g2.setColor(Color.gray);
+            g2.drawOval(X,Y , size, size);
+        }
+
+        
+        // text mod 
+        Font mononoki = new Font("mononoki Nerd Font", Font.PLAIN, font);        
+        g2.setFont(mononoki);
+        g2.setColor(Color.DARK_GRAY);
+        
+        //          str         x                      y 
+        // g2.drawString("1", (3/2 * dia)-(font/4), (3/2 * dia)+(font/2));
+        if(Integer.parseInt(count) < 10)
+            g2.drawString(count, X +(dia/2) + (dia/4), Y +dia+(dia/4));
+
+        else
+            g2.drawString(count, X +(dia/2)  , Y +dia+(dia/4));
+
+        
+        // corner dot to show x,y
+        g2.fillOval(X, Y, size/10, size/10);
+    }
+    int index = 0;
+    @Override
+    public void actionPerformed(ActionEvent arg0) {
+        Random random = new Random(); 
+        if(index >= 30)
+            pause();
+        else{
+            insertNode(random.nextInt(99));
+        }
+        repaint();
+        
+    }
+    private void pause(){
+        this.timer = null;
+    }
+   
+    
+    
 }

@@ -3,6 +3,7 @@ package src;
 
 import javax.swing.Timer;
 
+import src.Components.Binary_Tree;
 import src.Components.Node;
 
 import java.awt.*;
@@ -27,12 +28,11 @@ public class myPanel extends JPanel implements KeyListener, ActionListener{
     
     int width;
     int height;
-    Node selected;
-    Node root;
     Timer timer;
     
     int size;
      
+    Binary_Tree tree; 
     myPanel(int width, int height){
 
         this.width = width;
@@ -40,17 +40,10 @@ public class myPanel extends JPanel implements KeyListener, ActionListener{
         this.setFocusable(true);
         this.addKeyListener(this);
         this.setBackground(Color.black);
-        // Node root = nodeController(this.width, 100);
-        // this.root = root;
-        
-        size = 100;
-        // stack block
-        // stackList = new ArrayList<>();
-        // queueList = new LinkedList<>();
-        // createStack();
-        // createQueue();
-        
-              
+        this.size = 100;
+
+        tree = new Binary_Tree(width,height);
+        this.add(tree);
     }
 
 
@@ -58,25 +51,8 @@ public class myPanel extends JPanel implements KeyListener, ActionListener{
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
         doDrawing(g);
-        // paintGrid(g, 15);
-        
-        // paintController(g, this.root); 
-        // paintStackBlock(g, 150, "1");
-        // stackController(g);
-        // queueController(g);
 
-        // int x = 150;
-        // int y = 150;
-        // int size = 100;
-        // paintMatrixCell(g, size, "10",x,y );
-        // paintMatrixCell(g, size, "9",x+ size,y+size);
-        // matrixController(g);
-        // printMatQueue(g);
     }
-    
-
-    
-
 
     private void paintGrid(Graphics g, int scale){
         int newHeight = this.height/scale;
@@ -124,65 +100,81 @@ public class myPanel extends JPanel implements KeyListener, ActionListener{
         Scanner scan; 
         switch (key){
             case KeyEvent.VK_LEFT:
-                // selected.left.isSelected = true;
-                // selected = selected.left;
-                repaint();
                 break;
             case KeyEvent.VK_RIGHT:
-                // selected.right.isSelected = true;
-                // selected = selected.right;
-                repaint();
                 break;
              case KeyEvent.VK_UP:
-                // selected.parent.isSelected = true;
-                // selected = selected.parent;
-                repaint();
                 break;
             case KeyEvent.VK_DOWN:
-                Animate(); 
                 break;
             case KeyEvent.VK_E:
-                tempdfs = true; 
-                // treeStack = new Stack<>();
-                // treeStack.add(this.selected);
-                Animate(); 
+                tree.clicked();
                 break;
             case KeyEvent.VK_T:
-                // stackRemove();
                 break;
             case KeyEvent.VK_R:
-                scan = new Scanner(System.in);
-                System.out.println("insert num");
-                String input = scan.nextLine();
-                // stackAdd(input);
                 break;
             case KeyEvent.VK_F:
-                // queueRemove();
-                break;
-            case KeyEvent.VK_G:
-                scan = new Scanner(System.in);
-                System.out.println("insert num");
-                String in = scan.nextLine();
-                // queueAdd(in);
-            case KeyEvent.VK_W:
-                // matrixMoveUp();
-                break;
-            case KeyEvent.VK_A:
-                // matrixMoveLeft();
-                break;
-            case KeyEvent.VK_S:
-                // matrixMoveDown();
-                break;
-            case KeyEvent.VK_D:
-                // matrixMoveRight();
-                break;
-            case KeyEvent.VK_Q:
-                // matQueueAdd(current);
-                Animate();
                 break;
         }
     }
-    
+    // case KeyEvent.VK_LEFT:
+    //             // selected.left.isSelected = true;
+    //             // selected = selected.left;
+    //             repaint();
+    //             break;
+    //         case KeyEvent.VK_RIGHT:
+    //             // selected.right.isSelected = true;
+    //             // selected = selected.right;
+    //             repaint();
+    //             break;
+    //          case KeyEvent.VK_UP:
+    //             // selected.parent.isSelected = true;
+    //             // selected = selected.parent;
+    //             repaint();
+    //             break;
+    //         case KeyEvent.VK_DOWN:
+    //             Animate(); 
+    //             break;
+    //         case KeyEvent.VK_E:
+    //             tempdfs = true; 
+    //             // treeStack = new Stack<>();
+    //             // treeStack.add(this.selected);
+    //             Animate(); 
+    //             break;
+    //         case KeyEvent.VK_T:
+    //             // stackRemove();
+    //             break;
+    //         case KeyEvent.VK_R:
+    //             // scan = new Scanner(System.in);
+    //             // System.out.println("insert num");
+    //             // String input = scan.nextLine();
+    //             // stackAdd(input);
+    //             break;
+    //         case KeyEvent.VK_F:
+    //             // queueRemove();
+    //             break;
+    //         case KeyEvent.VK_G:
+    //             // scan = new Scanner(System.in);
+    //             // System.out.println("insert num");
+    //             // String in = scan.nextLine();
+    //             // queueAdd(in);
+    //         case KeyEvent.VK_W:
+    //             // matrixMoveUp();
+    //             break;
+    //         case KeyEvent.VK_A:
+    //             // matrixMoveLeft();
+    //             break;
+    //         case KeyEvent.VK_S:
+    //             // matrixMoveDown();
+    //             break;
+    //         case KeyEvent.VK_D:
+    //             // matrixMoveRight();
+    //             break;
+    //         case KeyEvent.VK_Q:
+    //             // matQueueAdd(current);
+    //             Animate();
+    //             break;
     boolean tempdfs = false;
     private void Animate(){
         //Set up timer to drive animation events.
