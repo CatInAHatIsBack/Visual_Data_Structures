@@ -21,7 +21,7 @@ In src/Notes&VC you can find previous code & testing
 
 # Displaying binary tree
 
-![box](https://raw.githubusercontent.com/CatInAHatIsBack/Visual_Data_Structures/master/src/Binary%20tree/Main.png)
+![box](https://raw.githubusercontent.com/CatInAHatIsBack/Visual_Data_Structures/master/src/Notes%26VC/Square.png)
 
 - Box is painted from D 
  
@@ -33,10 +33,10 @@ In src/Notes&VC you can find previous code & testing
    // for left nodes subtract nodesize from x
 
 ## pic offset & selection
-![angle](https://raw.githubusercontent.com/CatInAHatIsBack/Visual_Data_Structures/master/src/Binary%20tree/Selection_002.png)
+![angle](https://raw.githubusercontent.com/CatInAHatIsBack/Visual_Data_Structures/master/src/Notes%26VC/Selection_002.png)
 
 
-![offset](https://raw.githubusercontent.com/CatInAHatIsBack/Visual_Data_Structures/master/src/Binary%20tree/offset.png)
+![offset](https://raw.githubusercontent.com/CatInAHatIsBack/Visual_Data_Structures/master/src/Notes%26VC/offset.png)
 
 ### Space
 To create extra space the root node has a degree of x
