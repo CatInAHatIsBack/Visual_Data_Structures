@@ -19,6 +19,9 @@ public class Matrix extends JPanel{
     MatrixQueueController queue;
     MatrixStackController stack;
 
+    // choose bfs or dfs
+    private char choose; 
+    
     public Matrix(int width, int height, int size){
         this.width = width;
         this.height = height;
@@ -35,7 +38,6 @@ public class Matrix extends JPanel{
         stack = new MatrixStackController(width - 100, height*2/3, 100);
         this.add(stack);
         stack.stackAdd(corner);
-
     }
     private void init(){
         makeMatrix();
@@ -63,14 +65,15 @@ public class Matrix extends JPanel{
             matrix.add(temp);
         }
     }
-    
-    private void changeSelected(Cell curr){
+
+    //*****************  Search  **************************/
+
+     private void changeSelected(Cell curr){
         current.gray = true;
         current.current = false;
         current = curr;
         curr.current = true;
     }
-    
     public void matrixDFS(){
         int xlen = matrix.get(0).size();
         int ylen = matrix.size();
@@ -108,49 +111,57 @@ public class Matrix extends JPanel{
                 }
             } 
         }
-
-       // loop()
-            // remove from top of queue
-            // move to cell 
-            // get directions
-            // if not <0 || >size
-            // add to queue
     }
-    private void matrixMoveLeft() {
+    public void chooseBFS(){
+       choose = 'b';        
+    }
+    public void chooseDFS(){
+        choose = 'd';        
+    } 
+    public void next() {
+        if( choose == 'b'){
+            matrixBFS();    
+        }
+        else if( choose == 'd'){
+            matrixDFS();    
+        }
+	}
+    //*****************************************************/
 
+
+    //*****************  Move with vimstyle **********************/
+    
+    private void changeArrowSelected(Cell curr){
+        current.current = false;
+        current = curr;
+        curr.current = true;
+    }
+    public void matrixMoveLeft() {
         if(current.j-1 >= 0){
-            current.current = false;
-            current = matrix.get(current.i).get(current.j-1);
-            current.current = true;
+            changeArrowSelected(matrix.get(current.i).get(current.j-1));
         }
     }
 
-
-    private void matrixMoveDown() {
+    public void matrixMoveDown() {
         if(current.i+1 < matrix.size()){
-            current.current = false;
-            current = matrix.get(current.i+1).get(current.j);
-            current.current = true;
+            changeArrowSelected(matrix.get(current.i+1).get(current.j));
         }
     }
 
-
-    private void matrixMoveRight() {
+    public void matrixMoveRight() {
         if(current.j+1 < matrix.get(0).size()){
-            current.current = false;
-            current = matrix.get(current.i).get(current.j+1);
-            current.current = true;
+            changeArrowSelected(matrix.get(current.i).get(current.j+1));
         }
     }
 
-    private void matrixMoveUp(){
+    public void matrixMoveUp(){
         if(current.i -1 >= 0){
-            current.current = false;
-            current = matrix.get(current.i-1).get(current.j);
-            current.current = true;
+            changeArrowSelected(matrix.get(current.i-1).get(current.j));
         }
     }
     
+    //*****************************************************/
+
     private void paintMatrixCell(Graphics g, int size, String input, int X, int Y, boolean curr, boolean gray){
         Graphics2D g2 = (Graphics2D) g;
 
@@ -187,7 +198,12 @@ public class Matrix extends JPanel{
     public void paintComponent(Graphics g){
         super.paintComponent(g);
         matrixController(g);
-        queue.paintComponent(g);
-        // stack.paintComponent(g);
+        if (choose == 'b'){
+            queue.paintComponent(g);
+        }
+        else if (choose == 'd'){
+            stack.paintComponent(g);
+        }
     }
+	
 }

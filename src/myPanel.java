@@ -54,6 +54,7 @@ public class myPanel extends JPanel implements KeyListener, ActionListener{
 
     }
 
+    // grid
     private void paintGrid(Graphics g, int scale){
         int newHeight = this.height/scale;
         int newWidth = this.width/scale;
@@ -69,6 +70,7 @@ public class myPanel extends JPanel implements KeyListener, ActionListener{
         }
         
     }
+    // stary background
     private void doDrawing(Graphics g) {
 
         Graphics2D g2d = (Graphics2D) g;

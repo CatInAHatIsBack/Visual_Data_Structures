@@ -14,9 +14,10 @@ import java.util.List;
 public class MatrixQueueController extends JComponent{
     
     int size;
-    int width;
+    int width; 
     List<Block> queueList;
     Deque<Cell> queue;
+
     public MatrixQueueController(int width, int size){
         queueList = new LinkedList<>();
         queue = new LinkedList<>();

@@ -28,6 +28,9 @@ public class Binary_Tree extends JPanel implements ActionListener{
     int neg = 10;
     QueueController queue;
     StackController stack;
+
+    private char choose;
+
     public Binary_Tree(int width, int height){
         this.width = width;
         this.height = height;
@@ -45,15 +48,33 @@ public class Binary_Tree extends JPanel implements ActionListener{
         this.setVisible(true);
 
         insertNodes(array); 
-        // queue = new QueueController(width - 100, 100); 
-        // this.add(queue);
-        // queue.queueAdd(root);
+
+        // queue
+        queue = new QueueController(width - 100, 100); 
+        this.add(queue);
+        queue.queueAdd(root);
+
+        // stack
         stack = new StackController(width - 100, height*2/3, 100);
         this.add(stack);
         stack.stackAdd(root);
+
     }
     
-    
+    public void chooseBFS(){
+       choose = 'b';        
+    }
+    public void chooseDFS(){
+        choose = 'd';        
+    } 
+    public void next() {
+        if( choose == 'b'){
+            treeBFS();    
+        }
+        else if( choose == 'd'){
+            treeDFS();    
+        }
+	}
     private void insertNode(int input){
         if(nodes.size() == 0){
             makeRoot(input);
@@ -92,10 +113,15 @@ public class Binary_Tree extends JPanel implements ActionListener{
         }
     }
     
-    private void moveRight() {
-
+    public void moveRight() {
+        if (selected.right != null){
+            changeSelected(selected.right);    
+        }
     }
-    private void moveLeft() {
+    public void moveLeft() {
+        if (selected.left!= null){
+            changeSelected(selected.left);    
+        }
     }
     private void insertLeft(Node curr, int input){
 
@@ -110,7 +136,7 @@ public class Binary_Tree extends JPanel implements ActionListener{
         int size = (int) (curr.size*shrinkage);
         Node lNode= new Node(point.x, point.y,size,input, currLeft,newRotation, off);
         curr.left = lNode;
-        curr.left.parent = lNode;
+        curr.left.parent = curr;
         curr.left.hasParent = true;
    
     }
@@ -124,7 +150,7 @@ public class Binary_Tree extends JPanel implements ActionListener{
         int size = (int) (curr.size*shrinkage);
         Node rNode= new Node(point.x, point.y,size,input, currRight,newRotation, off);
         curr.right = rNode;
-        curr.right.parent = rNode;
+        curr.right.parent = curr;
         curr.right.hasParent = true;
 
     }
@@ -141,17 +167,7 @@ public class Binary_Tree extends JPanel implements ActionListener{
         selected = root;
     }
     
-
     
-    
-    private void removeNode(){}
-    
-    private void nodeMoveUp(){}
-
-    private void printTree(){}
-    private void printSearchTree(){}
-
-
     private Point makeNode(Node node, int off, int theta){
         
         int newx;
@@ -194,7 +210,7 @@ public class Binary_Tree extends JPanel implements ActionListener{
     }
    
     
-    public void dfs(){
+    public void treeDFS(){
         Node curr = stack.stackRemove();  
         changeSelected(curr);
         if(curr.right != null){
@@ -207,7 +223,7 @@ public class Binary_Tree extends JPanel implements ActionListener{
             return;
         }
     }
-    public void bfs(){
+    public void treeBFS(){
         
         Node curr = queue.queueRemove();  
         changeSelected(curr);
@@ -226,14 +242,17 @@ public class Binary_Tree extends JPanel implements ActionListener{
     private void changeSelected(Node curr){
         selected.isPath = true;
         selected.isSelected = false;
-        selected = curr;
+        this.selected = curr;
         curr.isSelected = true;
     }
-
-    private void moveUp(){
-        this.selected.isSelected = false; 
-        changeSelected(selected.parent); 
-        selected.isPath = false;
+    
+    public void moveUp(){
+        if (selected.hasParent){
+            selected.isSelected = false;
+            selected.isPath = false;
+            this.selected = selected.parent;
+            selected.isSelected = true;
+        }
     }
     private void paintNode(Graphics g, int X, int Y, int size, String count, boolean isSelected, boolean isPath){
         Graphics2D g2 = (Graphics2D) g;
@@ -278,21 +297,36 @@ public class Binary_Tree extends JPanel implements ActionListener{
     }
     @Override
     public void actionPerformed(ActionEvent arg0) {
-        if(!queue.queue.isEmpty()){
-            bfs();
+        if (choose == 'b'){
+            if(!queue.queue.isEmpty()){
+                treeBFS();
+            }
+            else{
+                pause();
+            }
+            repaint();
         }
-        else{
-            pause();
+        else if (choose == 'd'){
+            if(!queue.queue.isEmpty()){
+                treeDFS();
+            }
+            else{
+                pause();
+            }
+            repaint();
         }
-        repaint();
-        
     }
     private void pause(){
         this.timer = null;
     }
     public void clicked(){
         this.setBackground(Color.blue);
-        queue.queueAdd(root);
+        if (choose == 'b'){
+            queue.queueAdd(root);
+        }
+        else if (choose == 'd'){
+            stack.stackAdd(root);
+        }
         Animate(); 
 
     }
@@ -307,7 +341,11 @@ public class Binary_Tree extends JPanel implements ActionListener{
     public void paintComponent(Graphics g){
         super.paintComponent(g);
         paintController(g, this.root);
-        // queue.paintComponent(g);
-        stack.paintComponent(g);
+        if (choose == 'b'){
+            queue.paintComponent(g);
+        }
+        else if (choose == 'd'){
+            stack.paintComponent(g);
+        } 
     }   
 }
